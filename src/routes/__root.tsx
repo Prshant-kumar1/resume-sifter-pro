@@ -1,8 +1,5 @@
-import { Outlet, createRootRoute, HeadContent, Scripts, Link } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Scripts, Link } from "@tanstack/react-router";
 import { AppLayout } from "@/components/AppLayout";
-
-// Keep Outlet imported (used inside AppLayout via routing tree)
-void Outlet;
 
 import appCss from "../styles.css?url";
 
