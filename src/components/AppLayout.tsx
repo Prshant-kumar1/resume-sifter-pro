@@ -66,7 +66,7 @@ export function AppLayout() {
         "flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar",
         "fixed inset-y-0 left-0 z-40 md:sticky md:top-0",
         mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-        "transition-transform duration-200"
+        "transition-transform duration-200",
       )}
     >
       {/* Logo */}
@@ -109,13 +109,15 @@ export function AppLayout() {
                         "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                         active
                           ? "bg-sidebar-accent text-foreground shadow-[inset_0_0_0_1px_oklch(1_0_0/8%)]"
-                          : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
+                          : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground",
                       )}
                     >
                       <Icon
                         className={cn(
                           "h-4 w-4",
-                          active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                          active
+                            ? "text-primary"
+                            : "text-muted-foreground group-hover:text-foreground",
                         )}
                       />
                       <span className="flex-1">{item.label}</span>

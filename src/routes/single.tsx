@@ -11,7 +11,10 @@ export const Route = createFileRoute("/single")({
   head: () => ({
     meta: [
       { title: "Single Screening — ResumeSift" },
-      { name: "description", content: "Screen a single resume against any job description with AI." },
+      {
+        name: "description",
+        content: "Screen a single resume against any job description with AI.",
+      },
     ],
   }),
   component: SinglePage,
@@ -20,7 +23,11 @@ export const Route = createFileRoute("/single")({
 function ScoreGauge({ score }: { score: number }) {
   const clamped = Math.max(0, Math.min(100, score));
   const color =
-    clamped >= 70 ? "var(--color-success)" : clamped >= 40 ? "var(--color-warning)" : "var(--color-destructive)";
+    clamped >= 70
+      ? "var(--color-success)"
+      : clamped >= 40
+        ? "var(--color-warning)"
+        : "var(--color-destructive)";
   const r = 56;
   const c = 2 * Math.PI * r;
   const offset = c - (clamped / 100) * c;
@@ -45,7 +52,9 @@ function ScoreGauge({ score }: { score: number }) {
         <span className="text-3xl font-bold tracking-tight" style={{ color }}>
           {Math.round(clamped)}%
         </span>
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">match score</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          match score
+        </span>
       </div>
     </div>
   );
@@ -108,7 +117,7 @@ function SinglePage() {
   const submit = async () => {
     setError(null);
     if (!resumeText.trim()) return setError("Resume text is required.");
-    const jd = showCustom ? customJD : selectedJob?.description ?? "";
+    const jd = showCustom ? customJD : (selectedJob?.description ?? "");
     if (!jd.trim()) return setError("Please choose a job or paste a custom JD.");
 
     setLoading(true);
@@ -131,7 +140,10 @@ function SinglePage() {
         result: Math.random() > 0.4 ? "Match" : "No Match",
         probability: Math.round(Math.random() * 100),
         confidence: Math.round(60 + Math.random() * 40),
-        matched_skills: ["TypeScript", "React", "Node.js", "REST APIs"].slice(0, 2 + Math.floor(Math.random() * 3)),
+        matched_skills: ["TypeScript", "React", "Node.js", "REST APIs"].slice(
+          0,
+          2 + Math.floor(Math.random() * 3),
+        ),
         missing_skills: ["GraphQL", "AWS", "Docker"].slice(0, 1 + Math.floor(Math.random() * 2)),
         recommendation:
           "Strong front-end fundamentals with relevant framework experience. Consider deeper assessment on cloud infrastructure during interview.",
@@ -234,7 +246,7 @@ function SinglePage() {
           disabled={loading}
           className={cn(
             "mt-1 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60",
-            !loading && "glow-ring"
+            !loading && "glow-ring",
           )}
         >
           <Sparkles className="h-4 w-4" />
@@ -325,7 +337,9 @@ function SinglePage() {
 
             <button
               onClick={() => {
-                const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
+                const blob = new Blob([JSON.stringify(result, null, 2)], {
+                  type: "application/json",
+                });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;

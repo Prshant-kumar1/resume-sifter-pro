@@ -28,8 +28,8 @@ export const useAppStore = create<AppState>()(
       setApiBaseUrl: (apiBaseUrl) => set({ apiBaseUrl }),
       setProfile: (p) => set((s) => ({ ...s, ...p })),
     }),
-    { name: "resumesift-app" }
-  )
+    { name: "resumesift-app" },
+  ),
 );
 
 // Local-only data fallback (when API unreachable)
@@ -73,6 +73,6 @@ export const useLocalStore = create<LocalState>()(
       addHistory: (h) => set({ history: [h, ...get().history].slice(0, 200) }),
       clearHistory: () => set({ history: [] }),
     }),
-    { name: "resumesift-local" }
-  )
+    { name: "resumesift-local" },
+  ),
 );

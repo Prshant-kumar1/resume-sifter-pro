@@ -191,9 +191,7 @@ function JobsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="surface w-full max-w-lg rounded-2xl border border-border/60 p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-base font-semibold">
-                {editingId ? "Edit Job" : "Add New Job"}
-              </h3>
+              <h3 className="text-base font-semibold">{editingId ? "Edit Job" : "Add New Job"}</h3>
               <button
                 onClick={() => setOpen(false)}
                 className="rounded-md p-1 text-muted-foreground hover:bg-surface-elevated"
@@ -204,42 +202,58 @@ function JobsPage() {
 
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">Job Title</label>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  Job Title
+                </label>
                 <input
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   className={cn(
                     "surface-elev w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
-                    errors.title ? "border-destructive/60 focus:ring-destructive/20" : "border-border focus:border-primary/50 focus:ring-primary/20"
+                    errors.title
+                      ? "border-destructive/60 focus:ring-destructive/20"
+                      : "border-border focus:border-primary/50 focus:ring-primary/20",
                   )}
                   placeholder="e.g. Senior Frontend Engineer"
                 />
-                {errors.title && <p className="mt-1 text-[11px] text-destructive">{errors.title}</p>}
+                {errors.title && (
+                  <p className="mt-1 text-[11px] text-destructive">{errors.title}</p>
+                )}
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">Department</label>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  Department
+                </label>
                 <input
                   value={form.department}
                   onChange={(e) => setForm({ ...form, department: e.target.value })}
                   className="surface-elev w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="e.g. Engineering"
                 />
-                {errors.department && <p className="mt-1 text-[11px] text-destructive">{errors.department}</p>}
+                {errors.department && (
+                  <p className="mt-1 text-[11px] text-destructive">{errors.department}</p>
+                )}
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">Job Description</label>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  Job Description
+                </label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   className={cn(
                     "surface-elev min-h-40 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
-                    errors.description ? "border-destructive/60 focus:ring-destructive/20" : "border-border focus:border-primary/50 focus:ring-primary/20"
+                    errors.description
+                      ? "border-destructive/60 focus:ring-destructive/20"
+                      : "border-border focus:border-primary/50 focus:ring-primary/20",
                   )}
                   placeholder="Paste the full JD here…"
                 />
-                {errors.description && <p className="mt-1 text-[11px] text-destructive">{errors.description}</p>}
+                {errors.description && (
+                  <p className="mt-1 text-[11px] text-destructive">{errors.description}</p>
+                )}
               </div>
             </div>
 

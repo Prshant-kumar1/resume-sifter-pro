@@ -1,6 +1,8 @@
 export const API_BASE_URL = "https://web-production-ac9a1.up.railway.app/api/v1";
 
-type FetchOptions = RequestInit & { params?: Record<string, string | number | boolean | undefined> };
+type FetchOptions = RequestInit & {
+  params?: Record<string, string | number | boolean | undefined>;
+};
 
 async function request<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const { params, headers, ...rest } = options;
@@ -37,7 +39,8 @@ export const api = {
     request<T>(path, { ...options, method: "POST", body: body ? JSON.stringify(body) : undefined }),
   put: <T>(path: string, body?: unknown, options?: FetchOptions) =>
     request<T>(path, { ...options, method: "PUT", body: body ? JSON.stringify(body) : undefined }),
-  del: <T>(path: string, options?: FetchOptions) => request<T>(path, { ...options, method: "DELETE" }),
+  del: <T>(path: string, options?: FetchOptions) =>
+    request<T>(path, { ...options, method: "DELETE" }),
 };
 
 // ---------- Types ----------

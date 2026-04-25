@@ -1,6 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Upload, FileSpreadsheet, Download, Sparkles, AlertCircle, ChevronDown } from "lucide-react";
+import {
+  Upload,
+  FileSpreadsheet,
+  Download,
+  Sparkles,
+  AlertCircle,
+  ChevronDown,
+} from "lucide-react";
 import { ResultBadge } from "@/components/ResultBadge";
 import { api, type JobDescription, type ScreeningResult } from "@/lib/api";
 import { useAppStore, useLocalStore } from "@/lib/store";
@@ -99,7 +106,7 @@ function BatchPage() {
   const runBatch = async () => {
     setError(null);
     if (csvRows.length === 0) return setError("Upload a CSV first.");
-    const jd = showCustom ? customJD : selectedJob?.description ?? "";
+    const jd = showCustom ? customJD : (selectedJob?.description ?? "");
     if (!jd.trim()) return setError("Provide a job description.");
 
     setLoading(true);
@@ -114,12 +121,11 @@ function BatchPage() {
         job_description: jd,
         threshold: threshold / 100,
       });
-      const list = Array.isArray(res) ? res : res.results ?? [];
+      const list = Array.isArray(res) ? res : (res.results ?? []);
       const ranked = list
         .slice()
         .sort(
-          (a, b) =>
-            Number(b.probability ?? b.score ?? 0) - Number(a.probability ?? a.score ?? 0)
+          (a, b) => Number(b.probability ?? b.score ?? 0) - Number(a.probability ?? a.score ?? 0),
         )
         .map((r, i) => ({ ...r, rank: i + 1 }));
       setResults(ranked);
@@ -136,7 +142,9 @@ function BatchPage() {
           matched_skills: ["React", "TS", "Node"].slice(0, 1 + Math.floor(Math.random() * 3)),
         };
       });
-      const ranked = fake.sort((a, b) => Number(b.score) - Number(a.score)).map((r, i) => ({ ...r, rank: i + 1 }));
+      const ranked = fake
+        .sort((a, b) => Number(b.score) - Number(a.score))
+        .map((r, i) => ({ ...r, rank: i + 1 }));
       setResults(ranked);
       setProgress(100);
       setError(`Live API unreachable — showing simulated batch. (${(e as Error).message})`);
@@ -155,7 +163,7 @@ function BatchPage() {
           r.result ?? "",
           r.score ?? r.probability ?? "",
           `"${(r.matched_skills ?? []).join("; ")}"`,
-        ].join(",")
+        ].join(","),
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -175,7 +183,15 @@ function BatchPage() {
           <div>
             <h2 className="text-sm font-semibold">Upload Resume CSV</h2>
             <p className="text-xs text-muted-foreground">
-              CSV must have a <code className="rounded bg-surface-elevated px-1 py-0.5 text-[11px]">resume_text</code> column. Optional: <code className="rounded bg-surface-elevated px-1 py-0.5 text-[11px]">candidate_name</code>.
+              CSV must have a{" "}
+              <code className="rounded bg-surface-elevated px-1 py-0.5 text-[11px]">
+                resume_text
+              </code>{" "}
+              column. Optional:{" "}
+              <code className="rounded bg-surface-elevated px-1 py-0.5 text-[11px]">
+                candidate_name
+              </code>
+              .
             </p>
           </div>
           <div
@@ -209,7 +225,9 @@ function BatchPage() {
         {/* JD + threshold */}
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Job Description</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              Job Description
+            </label>
             <div className="relative">
               <select
                 value={selectedJobId}
@@ -271,7 +289,7 @@ function BatchPage() {
             disabled={loading || csvRows.length === 0}
             className={cn(
               "inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60",
-              !loading && csvRows.length > 0 && "glow-ring"
+              !loading && csvRows.length > 0 && "glow-ring",
             )}
           >
             <Sparkles className="h-4 w-4" />
@@ -297,7 +315,9 @@ function BatchPage() {
           <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
             <div>
               <h2 className="text-sm font-semibold">Batch Results</h2>
-              <p className="text-xs text-muted-foreground">Sorted by score · {results.length} candidates</p>
+              <p className="text-xs text-muted-foreground">
+                Sorted by score · {results.length} candidates
+              </p>
             </div>
             <button
               onClick={exportAll}
@@ -322,21 +342,26 @@ function BatchPage() {
                 {results.map((r, i) => {
                   const score = Number(r.probability ?? r.score ?? 0);
                   return (
-                    <tr key={i} className="border-b border-border/40 last:border-0 hover:bg-surface-elevated/50">
+                    <tr
+                      key={i}
+                      className="border-b border-border/40 last:border-0 hover:bg-surface-elevated/50"
+                    >
                       <td className="px-5 py-3">
                         <span
                           className={cn(
                             "inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold",
                             r.rank === 1
                               ? "bg-primary/20 text-primary ring-1 ring-primary/40"
-                              : "bg-surface-elevated text-muted-foreground"
+                              : "bg-surface-elevated text-muted-foreground",
                           )}
                         >
                           {r.rank}
                         </span>
                       </td>
                       <td className="px-2 py-3 font-medium">{r.candidate_name ?? "—"}</td>
-                      <td className="px-2 py-3"><ResultBadge result={String(r.result ?? "")} /></td>
+                      <td className="px-2 py-3">
+                        <ResultBadge result={String(r.result ?? "")} />
+                      </td>
                       <td className="px-2 py-3">
                         <div className="flex items-center gap-2">
                           <div className="h-1.5 w-20 overflow-hidden rounded-full bg-surface-elevated">
@@ -349,12 +374,14 @@ function BatchPage() {
                         </div>
                       </td>
                       <td className="px-2 py-3 text-muted-foreground">
-                        {(r.matched_skills?.length ?? 0)} skills
+                        {r.matched_skills?.length ?? 0} skills
                       </td>
                       <td className="px-5 py-3 text-right">
                         <button
                           onClick={() => {
-                            const blob = new Blob([JSON.stringify(r, null, 2)], { type: "application/json" });
+                            const blob = new Blob([JSON.stringify(r, null, 2)], {
+                              type: "application/json",
+                            });
                             const url = URL.createObjectURL(blob);
                             const a = document.createElement("a");
                             a.href = url;

@@ -39,7 +39,10 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Dashboard — ResumeSift" },
-      { name: "description", content: "Track screening activity, match rates, and recent results." },
+      {
+        name: "description",
+        content: "Track screening activity, match rates, and recent results.",
+      },
     ],
   }),
   component: DashboardPage,
@@ -66,7 +69,7 @@ function StatCard({ stat, loading }: { stat: Stat; loading?: boolean }) {
               "rounded-full px-2 py-0.5 text-[10px] font-semibold",
               stat.trend.dir === "up"
                 ? "bg-success/10 text-success"
-                : "bg-destructive/10 text-destructive"
+                : "bg-destructive/10 text-destructive",
             )}
           >
             {stat.trend.dir === "up" ? "↑" : "↓"} {stat.trend.pct}
@@ -100,15 +103,15 @@ function DashboardPage() {
     setLoading(true);
     api
       .get<ScreeningResult[] | { items?: ScreeningResult[]; data?: ScreeningResult[] }>(
-        "/screening/history"
+        "/screening/history",
       )
       .then((res) => {
         if (cancelled) return;
         const list = Array.isArray(res)
           ? res
-          : (res as { items?: ScreeningResult[] }).items ??
+          : ((res as { items?: ScreeningResult[] }).items ??
             (res as { data?: ScreeningResult[] }).data ??
-            [];
+            []);
         setHistory(list);
       })
       .catch(() => {
@@ -127,12 +130,12 @@ function DashboardPage() {
   const stats = useMemo<Stat[]>(() => {
     const total = data.length;
     const matches = data.filter(
-      (d) => (d.result || "").toString().toLowerCase() === "match"
+      (d) => (d.result || "").toString().toLowerCase() === "match",
     ).length;
     const matchRate = total ? Math.round((matches / total) * 100) : 0;
     const avgConf = total
       ? Math.round(
-          data.reduce((s, d) => s + (Number(d.confidence ?? d.probability ?? 0) || 0), 0) / total
+          data.reduce((s, d) => s + (Number(d.confidence ?? d.probability ?? 0) || 0), 0) / total,
         )
       : 0;
     const today = new Date().toDateString();
@@ -146,16 +149,40 @@ function DashboardPage() {
       const r = d.job_role ?? d.job_title ?? "—";
       roleCount.set(r, (roleCount.get(r) ?? 0) + 1);
     });
-    const topRole =
-      Array.from(roleCount.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
+    const topRole = Array.from(roleCount.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
 
     return [
-      { label: "Total Screened", value: String(total || 0), icon: Users, trend: { dir: "up", pct: "12%", vs: "vs last week" } },
-      { label: "Match Rate", value: `${matchRate}%`, icon: Target, trend: { dir: "up", pct: "4%", vs: "vs last week" } },
-      { label: "Avg Confidence", value: `${avgConf}%`, icon: TrendingUp, trend: { dir: "up", pct: "2%", vs: "vs last week" } },
-      { label: "Screened Today", value: String(screenedToday), icon: Calendar, trend: { dir: "up", pct: "18%", vs: "vs yesterday" } },
+      {
+        label: "Total Screened",
+        value: String(total || 0),
+        icon: Users,
+        trend: { dir: "up", pct: "12%", vs: "vs last week" },
+      },
+      {
+        label: "Match Rate",
+        value: `${matchRate}%`,
+        icon: Target,
+        trend: { dir: "up", pct: "4%", vs: "vs last week" },
+      },
+      {
+        label: "Avg Confidence",
+        value: `${avgConf}%`,
+        icon: TrendingUp,
+        trend: { dir: "up", pct: "2%", vs: "vs last week" },
+      },
+      {
+        label: "Screened Today",
+        value: String(screenedToday),
+        icon: Calendar,
+        trend: { dir: "up", pct: "18%", vs: "vs yesterday" },
+      },
       { label: "Top Matched Role", value: topRole, icon: Briefcase },
-      { label: "Avg Time to Screen", value: "2.4s", icon: Clock, trend: { dir: "down", pct: "8%", vs: "faster" } },
+      {
+        label: "Avg Time to Screen",
+        value: "2.4s",
+        icon: Clock,
+        trend: { dir: "down", pct: "8%", vs: "faster" },
+      },
     ];
   }, [data]);
 
@@ -211,7 +238,7 @@ function DashboardPage() {
           r.probability ?? r.confidence ?? "",
           `"${(r.job_role ?? r.job_title ?? "").replace(/"/g, '""')}"`,
           r.date ?? r.created_at ?? "",
-        ].join(",")
+        ].join(","),
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -249,7 +276,10 @@ function DashboardPage() {
               <Skeleton className="h-full w-full" />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={activitySeries} margin={{ top: 10, right: 8, left: -16, bottom: 0 }}>
+                <AreaChart
+                  data={activitySeries}
+                  margin={{ top: 10, right: 8, left: -16, bottom: 0 }}
+                >
                   <defs>
                     <linearGradient id="teal" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.5} />
@@ -257,8 +287,17 @@ function DashboardPage() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="oklch(1 0 0 / 6%)" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
                   <Tooltip
                     cursor={{ stroke: "var(--color-primary)", strokeOpacity: 0.3 }}
                     contentStyle={{
@@ -268,7 +307,13 @@ function DashboardPage() {
                       fontSize: 12,
                     }}
                   />
-                  <Area type="monotone" dataKey="count" stroke="var(--color-primary)" strokeWidth={2} fill="url(#teal)" />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke="var(--color-primary)"
+                    strokeWidth={2}
+                    fill="url(#teal)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             )}
@@ -371,7 +416,7 @@ function DashboardPage() {
                 "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition",
                 privacyMode
                   ? "border-primary/40 bg-primary/10 text-primary"
-                  : "border-border bg-surface-elevated text-muted-foreground hover:text-foreground"
+                  : "border-border bg-surface-elevated text-muted-foreground hover:text-foreground",
               )}
             >
               {privacyMode ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -380,7 +425,11 @@ function DashboardPage() {
             <button
               disabled={selected.size === 0}
               onClick={() =>
-                exportCsv(Array.from(selected).map((i) => paged[i]).filter(Boolean))
+                exportCsv(
+                  Array.from(selected)
+                    .map((i) => paged[i])
+                    .filter(Boolean),
+                )
               }
               className="inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
             >
@@ -424,9 +473,7 @@ function DashboardPage() {
                         checked={selected.size === paged.length && paged.length > 0}
                         onChange={(e) =>
                           setSelected(
-                            e.target.checked
-                              ? new Set(paged.map((_, i) => i))
-                              : new Set()
+                            e.target.checked ? new Set(paged.map((_, i) => i)) : new Set(),
                           )
                         }
                       />
@@ -445,7 +492,10 @@ function DashboardPage() {
                     const idx = page * PAGE_SIZE + i + 1;
                     const prob = Number(row.probability ?? row.confidence ?? 0);
                     return (
-                      <tr key={i} className="border-b border-border/40 last:border-0 hover:bg-surface-elevated/50">
+                      <tr
+                        key={i}
+                        className="border-b border-border/40 last:border-0 hover:bg-surface-elevated/50"
+                      >
                         <td className="px-5 py-3">
                           <input
                             type="checkbox"
@@ -456,9 +506,11 @@ function DashboardPage() {
                         </td>
                         <td className="px-2 py-3 text-muted-foreground">{idx}</td>
                         <td className="px-2 py-3 font-medium">
-                          {privacyMode ? "Anonymous" : row.candidate_name ?? "—"}
+                          {privacyMode ? "Anonymous" : (row.candidate_name ?? "—")}
                         </td>
-                        <td className="px-2 py-3"><ResultBadge result={String(row.result ?? "")} /></td>
+                        <td className="px-2 py-3">
+                          <ResultBadge result={String(row.result ?? "")} />
+                        </td>
                         <td className="px-2 py-3">
                           <div className="flex items-center gap-2">
                             <div className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-elevated">
@@ -467,7 +519,9 @@ function DashboardPage() {
                                 style={{ width: `${Math.min(100, prob)}%` }}
                               />
                             </div>
-                            <span className="text-xs text-muted-foreground">{Math.round(prob)}%</span>
+                            <span className="text-xs text-muted-foreground">
+                              {Math.round(prob)}%
+                            </span>
                           </div>
                         </td>
                         <td className="px-2 py-3 text-muted-foreground">
@@ -493,8 +547,8 @@ function DashboardPage() {
 
             <div className="flex items-center justify-between border-t border-border/60 px-5 py-3 text-xs text-muted-foreground">
               <span>
-                Showing {page * PAGE_SIZE + 1}–
-                {Math.min((page + 1) * PAGE_SIZE, data.length)} of {data.length}
+                Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, data.length)} of{" "}
+                {data.length}
               </span>
               <div className="flex items-center gap-1">
                 <button

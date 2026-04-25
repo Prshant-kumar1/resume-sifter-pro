@@ -38,7 +38,7 @@ function SettingsPage() {
     setTestMsg("");
     try {
       const res = await fetch(apiBaseUrl.replace(/\/$/, "") + "/health").catch(() =>
-        fetch(apiBaseUrl)
+        fetch(apiBaseUrl),
       );
       if (res && res.ok) {
         setTestStatus("ok");
@@ -89,7 +89,9 @@ function SettingsPage() {
         <div>
           <label className="mb-1.5 flex items-center justify-between text-xs font-medium text-muted-foreground">
             <span>Default Threshold</span>
-            <span className="rounded-md bg-primary/15 px-2 py-0.5 font-semibold text-primary">{threshold}%</span>
+            <span className="rounded-md bg-primary/15 px-2 py-0.5 font-semibold text-primary">
+              {threshold}%
+            </span>
           </label>
           <input
             type="range"
@@ -110,13 +112,13 @@ function SettingsPage() {
             onClick={() => setPrivacyMode(!privacyMode)}
             className={cn(
               "relative h-6 w-11 rounded-full transition",
-              privacyMode ? "bg-primary" : "bg-border"
+              privacyMode ? "bg-primary" : "bg-border",
             )}
           >
             <span
               className={cn(
                 "absolute top-0.5 h-5 w-5 rounded-full bg-background transition",
-                privacyMode ? "left-[22px]" : "left-0.5"
+                privacyMode ? "left-[22px]" : "left-0.5",
               )}
             />
           </button>
@@ -127,7 +129,9 @@ function SettingsPage() {
       <Section title="Account" subtitle="Your profile information">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">Display Name</label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              Display Name
+            </label>
             <input
               value={displayName}
               onChange={(e) => setProfile({ displayName: e.target.value })}
