@@ -26,6 +26,8 @@ function JobsPage() {
   const [form, setForm] = useState<Form>({ title: "", department: "", description: "" });
   const [errors, setErrors] = useState<Partial<Form>>({});
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
 
   useEffect(() => {
     api
