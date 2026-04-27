@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Briefcase, Sparkles, X, Inbox } from "lucide-react";
+import { Plus, Pencil, Trash2, Briefcase, Sparkles, X, Inbox, Search } from "lucide-react";
 import { api, type JobDescription } from "@/lib/api";
 import { useLocalStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
