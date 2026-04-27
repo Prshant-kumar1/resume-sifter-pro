@@ -49,6 +49,21 @@ function JobsPage() {
     ...jobs.map((j) => ({ ...j, remote: false })),
   ];
 
+  const departments = Array.from(
+    new Set(allJobs.map((j) => j.department).filter((d) => d && d.trim().length > 0)),
+  ).sort();
+
+  const q = query.trim().toLowerCase();
+  const filteredJobs = allJobs.filter((j) => {
+    if (departmentFilter !== "all" && (j.department || "") !== departmentFilter) return false;
+    if (!q) return true;
+    return (
+      j.title.toLowerCase().includes(q) ||
+      (j.department || "").toLowerCase().includes(q) ||
+      (j.description || "").toLowerCase().includes(q)
+    );
+  });
+
   const openCreate = () => {
     setEditingId(null);
     setForm({ title: "", department: "", description: "" });
