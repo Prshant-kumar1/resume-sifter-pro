@@ -1,562 +1,351 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  Users,
-  Target,
-  TrendingUp,
-  Calendar,
-  Eye,
-  EyeOff,
-  Download,
-  ChevronLeft,
-  ChevronRight,
+  Sparkles,
   ArrowRight,
-  Inbox,
-  Sliders,
+  FileSearch,
+  Layers,
+  Briefcase,
+  ShieldCheck,
+  Download,
+  BarChart3,
+  CheckCircle2,
+  Zap,
 } from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
-import { Link } from "@tanstack/react-router";
-import { ResultBadge } from "@/components/ResultBadge";
-import { Skeleton } from "@/components/Skeleton";
-import { useAppStore, useLocalStore } from "@/lib/store";
-import { api, type ScreeningResult } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dashboard — ResumeSift" },
+      { title: "ResumeSift — AI Resume Screening for Recruiters" },
       {
         name: "description",
-        content: "Track screening activity, match rates, and recent results.",
+        content:
+          "Screen hundreds of resumes against any job description in seconds. AI-powered match scoring, batch processing, and ranked candidates — built for hiring teams.",
+      },
+      { property: "og:title", content: "ResumeSift — AI Resume Screening" },
+      {
+        property: "og:description",
+        content: "AI-powered resume screening that surfaces your best candidates instantly.",
       },
     ],
   }),
-  component: DashboardPage,
+  component: LandingPage,
 });
 
-type Stat = {
-  label: string;
-  value: string;
-  icon: React.ComponentType<{ className?: string }>;
-  trend?: { dir: "up" | "down"; pct: string; vs: string };
-};
-
-function StatCard({ stat, loading }: { stat: Stat; loading?: boolean }) {
-  const Icon = stat.icon;
+function LandingPage() {
   return (
-    <div className="surface relative overflow-hidden rounded-xl border border-border/60 p-4 transition hover:border-primary/30">
-      <div className="flex items-start justify-between">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
-          <Icon className="h-4 w-4" />
-        </div>
-        {stat.trend && !loading && (
-          <span
-            className={cn(
-              "rounded-full px-2 py-0.5 text-[10px] font-semibold",
-              stat.trend.dir === "up"
-                ? "bg-success/10 text-success"
-                : "bg-destructive/10 text-destructive",
-            )}
-          >
-            {stat.trend.dir === "up" ? "↑" : "↓"} {stat.trend.pct}
+    <div className="bg-aurora min-h-screen text-foreground">
+      {/* Top nav */}
+      <header className="sticky top-3 z-30 mx-auto mt-3 flex w-[min(1200px,calc(100%-1.5rem))] items-center justify-between rounded-full glass px-4 py-2.5 sm:px-5">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 ring-1 ring-primary/30">
+            <Sparkles className="h-4 w-4 text-primary" />
+          </div>
+          <span className="text-[15px] font-semibold tracking-tight">
+            Resume<span className="text-primary">Sift</span>
           </span>
-        )}
-      </div>
-      <p className="mt-4 text-xs text-muted-foreground">{stat.label}</p>
-      {loading ? (
-        <Skeleton className="mt-1.5 h-7 w-20" />
-      ) : (
-        <p className="mt-1 text-2xl font-semibold tracking-tight">{stat.value}</p>
-      )}
-      {stat.trend && !loading && (
-        <p className="mt-0.5 text-[11px] text-muted-foreground">{stat.trend.vs}</p>
-      )}
-    </div>
-  );
-}
-
-function DashboardPage() {
-  const [history, setHistory] = useState<ScreeningResult[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [selected, setSelected] = useState<Set<number>>(new Set());
-  const { threshold, setThreshold, privacyMode, setPrivacyMode } = useAppStore();
-  const localHistory = useLocalStore((s) => s.history);
-  const [thresholdEditing, setThresholdEditing] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    api
-      .get<ScreeningResult[] | { items?: ScreeningResult[]; data?: ScreeningResult[] }>(
-        "/screening/history",
-      )
-      .then((res) => {
-        if (cancelled) return;
-        const list = Array.isArray(res)
-          ? res
-          : ((res as { items?: ScreeningResult[] }).items ??
-            (res as { data?: ScreeningResult[] }).data ??
-            []);
-        setHistory(list);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        // Fall back to local-only history (or empty)
-        setHistory((localHistory as ScreeningResult[]) ?? []);
-      })
-      .finally(() => !cancelled && setLoading(false));
-    return () => {
-      cancelled = true;
-    };
-  }, [localHistory]);
-
-  const data = history ?? [];
-
-  const stats = useMemo<Stat[]>(() => {
-    const total = data.length;
-    const matches = data.filter(
-      (d) => (d.result || "").toString().toLowerCase() === "match",
-    ).length;
-    const matchRate = total ? Math.round((matches / total) * 100) : 0;
-    const avgConf = total
-      ? Math.round(
-          data.reduce((s, d) => s + (Number(d.confidence ?? d.probability ?? 0) || 0), 0) / total,
-        )
-      : 0;
-    const today = new Date().toDateString();
-    const screenedToday = data.filter((d) => {
-      const dt = new Date(d.date ?? d.created_at ?? "");
-      return !isNaN(dt.getTime()) && dt.toDateString() === today;
-    }).length;
-
-    return [
-      {
-        label: "Total Screened",
-        value: String(total || 0),
-        icon: Users,
-        trend: { dir: "up", pct: "12%", vs: "vs last week" },
-      },
-      {
-        label: "Match Rate",
-        value: `${matchRate}%`,
-        icon: Target,
-        trend: { dir: "up", pct: "4%", vs: "vs last week" },
-      },
-      {
-        label: "Avg Confidence",
-        value: `${avgConf}%`,
-        icon: TrendingUp,
-        trend: { dir: "up", pct: "2%", vs: "vs last week" },
-      },
-      {
-        label: "Screened Today",
-        value: String(screenedToday),
-        icon: Calendar,
-        trend: { dir: "up", pct: "18%", vs: "vs yesterday" },
-      },
-    ];
-  }, [data]);
-
-  const activitySeries = useMemo(() => {
-    const days: { date: string; count: number }[] = [];
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
-      days.push({
-        date: d.toLocaleDateString([], { month: "short", day: "numeric" }),
-        count:
-          data.filter((x) => (x.date ?? x.created_at ?? "").slice(0, 10) === key).length ||
-          // demo seed when no data
-          (data.length === 0 ? Math.floor(Math.random() * 12 + 2) : 0),
-      });
-    }
-    return days;
-  }, [data]);
-
-  const matches = data.filter((d) => (d.result || "").toString().toLowerCase() === "match").length;
-  const noMatches = data.length - matches;
-  const distribution = data.length
-    ? [
-        { name: "Match", value: matches, color: "var(--color-success)" },
-        { name: "No Match", value: noMatches, color: "var(--color-destructive)" },
-      ]
-    : [
-        { name: "Match", value: 62, color: "var(--color-success)" },
-        { name: "No Match", value: 38, color: "var(--color-destructive)" },
-      ];
-
-  // Pagination
-  const PAGE_SIZE = 5;
-  const totalPages = Math.max(1, Math.ceil(data.length / PAGE_SIZE));
-  const paged = data.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
-  const toggleSelected = (idx: number) => {
-    const next = new Set(selected);
-    if (next.has(idx)) next.delete(idx);
-    else next.add(idx);
-    setSelected(next);
-  };
-
-  const exportCsv = (rows: ScreeningResult[]) => {
-    const headers = ["Candidate", "Result", "Probability", "Job Role", "Date"];
-    const csv = [
-      headers.join(","),
-      ...rows.map((r) =>
-        [
-          `"${(r.candidate_name ?? "Anonymous").replace(/"/g, '""')}"`,
-          r.result ?? "",
-          r.probability ?? r.confidence ?? "",
-          `"${(r.job_role ?? r.job_title ?? "").replace(/"/g, '""')}"`,
-          r.date ?? r.created_at ?? "",
-        ].join(","),
-      ),
-    ].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `screenings-${Date.now()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {stats.map((s) => (
-          <StatCard key={s.label} stat={s} loading={loading} />
-        ))}
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="surface lg:col-span-2 rounded-xl border border-border/60 p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-semibold">Screening Activity</h2>
-              <p className="text-xs text-muted-foreground">Resumes screened in the last 14 days</p>
-            </div>
-            <span className="rounded-md bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary">
-              14d
-            </span>
-          </div>
-          <div className="mt-4 h-64">
-            {loading ? (
-              <Skeleton className="h-full w-full" />
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={activitySeries}
-                  margin={{ top: 10, right: 8, left: -16, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="teal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.5} />
-                      <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="oklch(1 0 0 / 6%)" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    cursor={{ stroke: "var(--color-primary)", strokeOpacity: 0.3 }}
-                    contentStyle={{
-                      background: "var(--color-surface-elevated)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    stroke="var(--color-primary)"
-                    strokeWidth={2}
-                    fill="url(#teal)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+        </Link>
+        <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+          <a href="#features" className="transition hover:text-foreground">
+            Features
+          </a>
+          <a href="#how" className="transition hover:text-foreground">
+            How it works
+          </a>
+          <a href="#cta" className="transition hover:text-foreground">
+            Pricing
+          </a>
+        </nav>
+        <div className="flex items-center gap-2">
+          <ThemeToggle className="hidden sm:inline-flex" />
+          <Link
+            to="/login"
+            className="hidden rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground sm:inline-flex"
+          >
+            Log in
+          </Link>
+          <Link
+            to="/login"
+            search={{ mode: "signup" }}
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
+          >
+            Get started
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
+      </header>
 
-        <div className="surface rounded-xl border border-border/60 p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-semibold">Match Distribution</h2>
-              <p className="text-xs text-muted-foreground">Across all screenings</p>
+      {/* Hero */}
+      <section className="relative mx-auto max-w-7xl px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+        <div className="grid items-center gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <div className="glass mb-5 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground">
+              <Zap className="h-3 w-3 text-primary" />
+              Built for high-volume hiring
             </div>
-          </div>
-
-          <div className="mt-2 h-48">
-            {loading ? (
-              <Skeleton className="h-full w-full" />
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={distribution}
-                    dataKey="value"
-                    innerRadius={48}
-                    outerRadius={72}
-                    paddingAngle={2}
-                    stroke="none"
-                  >
-                    {distribution.map((d) => (
-                      <Cell key={d.name} fill={d.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: "var(--color-surface-elevated)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-
-          <div className="mt-2 flex items-center justify-around text-center text-xs">
-            {distribution.map((d) => {
-              const total = distribution.reduce((s, x) => s + x.value, 0);
-              const pct = total ? Math.round((d.value / total) * 100) : 0;
-              return (
-                <div key={d.name}>
-                  <span
-                    className="mr-1 inline-block h-2 w-2 rounded-full"
-                    style={{ background: d.color }}
-                  />
-                  {d.name} <span className="ml-1 font-semibold text-foreground">{pct}%</span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Threshold chip */}
-          <div className="mt-4 rounded-lg border border-border/60 bg-surface-elevated p-3">
-            <button
-              onClick={() => setThresholdEditing((v) => !v)}
-              className="flex w-full items-center justify-between text-xs"
-            >
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <Sliders className="h-3 w-3" /> Current Threshold
-              </span>
-              <span className="rounded-md bg-primary/15 px-2 py-0.5 font-semibold text-primary">
-                {threshold}%
-              </span>
-            </button>
-            {thresholdEditing && (
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={threshold}
-                onChange={(e) => setThreshold(Number(e.target.value))}
-                className="mt-3 w-full accent-[var(--color-primary)]"
-              />
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent screenings */}
-      <div className="surface rounded-xl border border-border/60">
-        <div className="flex flex-wrap items-center gap-3 border-b border-border/60 px-5 py-4">
-          <div>
-            <h2 className="text-sm font-semibold">Recent Screenings</h2>
-            <p className="text-xs text-muted-foreground">Latest candidate evaluations</p>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <button
-              onClick={() => setPrivacyMode(!privacyMode)}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition",
-                privacyMode
-                  ? "border-primary/40 bg-primary/10 text-primary"
-                  : "border-border bg-surface-elevated text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {privacyMode ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-              {privacyMode ? "Anonymous" : "Privacy off"}
-            </button>
-            <button
-              disabled={selected.size === 0}
-              onClick={() =>
-                exportCsv(
-                  Array.from(selected)
-                    .map((i) => paged[i])
-                    .filter(Boolean),
-                )
-              }
-              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
-            >
-              <Download className="h-3.5 w-3.5" /> Export Selected
-            </button>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="space-y-2 p-5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
-          </div>
-        ) : data.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-5 py-16 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
-              <Inbox className="h-8 w-8" />
-            </div>
-            <h3 className="text-base font-semibold">No screenings yet</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Get started by screening your first resume.
+            <h1 className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-[64px]">
+              Screen <span className="text-gradient-teal">100s of resumes</span>
+              <br className="hidden sm:block" /> in seconds.
+            </h1>
+            <p className="mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
+              ResumeSift reads every resume against your job description, scores the match, and
+              ranks the best candidates — so your team only spends time on the people worth
+              talking to.
             </p>
-            <Link
-              to="/single"
-              className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-            >
-              Screen your first resume <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto scrollbar-thin">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border/60 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                    <th className="px-5 py-3 font-medium">
-                      <input
-                        type="checkbox"
-                        className="accent-[var(--color-primary)]"
-                        checked={selected.size === paged.length && paged.length > 0}
-                        onChange={(e) =>
-                          setSelected(
-                            e.target.checked ? new Set(paged.map((_, i) => i)) : new Set(),
-                          )
-                        }
-                      />
-                    </th>
-                    <th className="px-2 py-3 font-medium">#</th>
-                    <th className="px-2 py-3 font-medium">Candidate</th>
-                    <th className="px-2 py-3 font-medium">Result</th>
-                    <th className="px-2 py-3 font-medium">Probability</th>
-                    <th className="px-2 py-3 font-medium">Job Role</th>
-                    <th className="px-2 py-3 font-medium">Date</th>
-                    <th className="px-2 py-3 font-medium text-right">Download</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paged.map((row, i) => {
-                    const idx = page * PAGE_SIZE + i + 1;
-                    const prob = Number(row.probability ?? row.confidence ?? 0);
-                    return (
-                      <tr
-                        key={i}
-                        className="border-b border-border/40 last:border-0 hover:bg-surface-elevated/50"
-                      >
-                        <td className="px-5 py-3">
-                          <input
-                            type="checkbox"
-                            className="accent-[var(--color-primary)]"
-                            checked={selected.has(i)}
-                            onChange={() => toggleSelected(i)}
-                          />
-                        </td>
-                        <td className="px-2 py-3 text-muted-foreground">{idx}</td>
-                        <td className="px-2 py-3 font-medium">
-                          {privacyMode ? "Anonymous" : (row.candidate_name ?? "—")}
-                        </td>
-                        <td className="px-2 py-3">
-                          <ResultBadge result={String(row.result ?? "")} />
-                        </td>
-                        <td className="px-2 py-3">
-                          <div className="flex items-center gap-2">
-                            <div className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-elevated">
-                              <div
-                                className="h-full rounded-full bg-primary"
-                                style={{ width: `${Math.min(100, prob)}%` }}
-                              />
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {Math.round(prob)}%
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-2 py-3 text-muted-foreground">
-                          {row.job_role ?? row.job_title ?? "—"}
-                        </td>
-                        <td className="px-2 py-3 text-muted-foreground">
-                          {(row.date ?? row.created_at ?? "").toString().slice(0, 10) || "—"}
-                        </td>
-                        <td className="px-2 py-3 text-right">
-                          <button
-                            onClick={() => exportCsv([row])}
-                            className="rounded-md p-1.5 text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
-                          >
-                            <Download className="h-4 w-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                to="/login"
+                search={{ mode: "signup" }}
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition hover:opacity-90"
+              >
+                Start free
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a
+                href="#how"
+                className="glass inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-surface-elevated/40"
+              >
+                See how it works
+              </a>
             </div>
-
-            <div className="flex items-center justify-between border-t border-border/60 px-5 py-3 text-xs text-muted-foreground">
-              <span>
-                Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, data.length)} of{" "}
-                {data.length}
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                No credit card
               </span>
-              <div className="flex items-center gap-1">
-                <button
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  className="rounded-md p-1.5 hover:bg-surface-elevated disabled:opacity-40"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <span className="px-2">
-                  {page + 1} / {totalPages}
-                </span>
-                <button
-                  disabled={page >= totalPages - 1}
-                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                  className="rounded-md p-1.5 hover:bg-surface-elevated disabled:opacity-40"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                GDPR-friendly anonymization
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                CSV import &amp; export
+              </span>
+            </div>
+          </div>
+
+          {/* Glass mock card */}
+          <div className="lg:col-span-5">
+            <div className="relative">
+              <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-primary/30 via-transparent to-primary/10 blur-2xl" />
+              <div className="glass-strong rounded-2xl p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    Screening result
+                  </div>
+                  <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold text-success">
+                    Strong match
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-5">
+                  <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
+                    <svg viewBox="0 0 100 100" className="h-24 w-24 -rotate-90">
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="42"
+                        stroke="var(--color-border)"
+                        strokeWidth="8"
+                        fill="none"
+                      />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="42"
+                        stroke="var(--color-primary)"
+                        strokeWidth="8"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 42}`}
+                        strokeDashoffset={`${2 * Math.PI * 42 * (1 - 0.87)}`}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-2xl font-bold tracking-tight">87%</span>
+                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold">Senior Frontend Engineer</p>
+                    <p className="text-xs text-muted-foreground">Anonymous candidate · 4y exp</p>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {["React", "TypeScript", "Tailwind", "GraphQL"].map((t) => (
+                        <span
+                          key={t}
+                          className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-3 gap-2 text-center">
+                  {[
+                    { l: "Skills", v: "92%" },
+                    { l: "Experience", v: "84%" },
+                    { l: "Keywords", v: "85%" },
+                  ].map((m) => (
+                    <div key={m.l} className="glass rounded-lg px-2 py-2">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        {m.l}
+                      </p>
+                      <p className="text-sm font-semibold">{m.v}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Floating mini card */}
+              <div className="glass absolute -bottom-6 -left-6 hidden rounded-xl px-3 py-2.5 text-xs sm:flex sm:items-center sm:gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-primary">
+                  <Layers className="h-3.5 w-3.5" />
+                </div>
+                <div>
+                  <p className="font-semibold">142 resumes</p>
+                  <p className="text-[10px] text-muted-foreground">screened in 38s</p>
+                </div>
               </div>
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="mx-auto max-w-7xl px-6 pb-20">
+        <div className="mb-10 max-w-2xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            What you get
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Everything a recruiter needs to move faster.
+          </h2>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              icon: FileSearch,
+              title: "AI match scoring",
+              desc: "Each resume gets a 0-100 score plus an explanation of matched and missing skills.",
+            },
+            {
+              icon: Layers,
+              title: "Batch screening",
+              desc: "Upload a CSV and get every candidate scored and ranked in one pass.",
+            },
+            {
+              icon: Briefcase,
+              title: "Job repository",
+              desc: "Save job descriptions once, reuse them across screenings, track per-role activity.",
+            },
+            {
+              icon: ShieldCheck,
+              title: "Privacy mode",
+              desc: "Anonymize candidate names instantly to keep evaluations bias-free.",
+            },
+            {
+              icon: Download,
+              title: "CSV export",
+              desc: "Send shortlists to ATS or share with hiring managers in one click.",
+            },
+            {
+              icon: BarChart3,
+              title: "Hiring insights",
+              desc: "Match rate, throughput and confidence trends in a live dashboard.",
+            },
+          ].map((f) => (
+            <div
+              key={f.title}
+              className="glass group rounded-2xl p-5 transition hover:-translate-y-0.5 hover:shadow-glow"
+            >
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/25">
+                <f.icon className="h-5 w-5" />
+              </div>
+              <h3 className="text-base font-semibold">{f.title}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how" className="mx-auto max-w-7xl px-6 pb-20">
+        <div className="mb-10 max-w-2xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            How it works
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Three steps to a ranked shortlist.
+          </h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {[
+            { n: "01", t: "Paste your job description", d: "Save once, reuse forever." },
+            { n: "02", t: "Upload resumes", d: "PDF, TXT, or CSV — single or in bulk." },
+            { n: "03", t: "Get ranked candidates", d: "Match scores, missing skills, export." },
+          ].map((s) => (
+            <div key={s.n} className="glass-strong relative overflow-hidden rounded-2xl p-6">
+              <span className="absolute -top-2 right-4 text-7xl font-black text-primary/10">
+                {s.n}
+              </span>
+              <h3 className="text-lg font-semibold">{s.t}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{s.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section id="cta" className="mx-auto max-w-7xl px-6 pb-20">
+        <div className="glass-strong relative overflow-hidden rounded-3xl px-8 py-12 text-center sm:px-12 sm:py-16">
+          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
+          <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+            Stop reading resumes one by one.
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
+            Create a free account and screen your first 50 candidates today.
+          </p>
+          <div className="mt-7 flex flex-wrap justify-center gap-3">
+            <Link
+              to="/login"
+              search={{ mode: "signup" }}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition hover:opacity-90"
+            >
+              Get started free
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/login"
+              className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition hover:bg-surface-elevated/40"
+            >
+              I already have an account
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="mx-auto max-w-7xl px-6 pb-10">
+        <div className="glass flex flex-col items-center justify-between gap-3 rounded-2xl px-6 py-4 text-xs text-muted-foreground sm:flex-row">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span>© {new Date().getFullYear()} ResumeSift. All rights reserved.</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <a href="#features" className="hover:text-foreground">
+              Features
+            </a>
+            <a href="#how" className="hover:text-foreground">
+              How it works
+            </a>
+            <Link to="/login" className="hover:text-foreground">
+              Log in
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

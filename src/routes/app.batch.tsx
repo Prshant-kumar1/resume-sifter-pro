@@ -13,7 +13,7 @@ import { api, type JobDescription, type ScreeningResult } from "@/lib/api";
 import { useAppStore, useLocalStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/batch")({
+export const Route = createFileRoute("/app/batch")({
   head: () => ({
     meta: [
       { title: "Batch Screening — ResumeSift" },

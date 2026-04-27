@@ -9,30 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SingleRouteImport } from './routes/single'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as JobsRouteImport } from './routes/jobs'
-import { Route as BatchRouteImport } from './routes/batch'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as AppSingleRouteImport } from './routes/app.single'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppJobsRouteImport } from './routes/app.jobs'
+import { Route as AppBatchRouteImport } from './routes/app.batch'
 
-const SingleRoute = SingleRouteImport.update({
-  id: '/single',
-  path: '/single',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JobsRoute = JobsRouteImport.update({
-  id: '/jobs',
-  path: '/jobs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BatchRoute = BatchRouteImport.update({
-  id: '/batch',
-  path: '/batch',
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,73 +40,140 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppSingleRoute = AppSingleRouteImport.update({
+  id: '/single',
+  path: '/single',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJobsRoute = AppJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBatchRoute = AppBatchRouteImport.update({
+  id: '/batch',
+  path: '/batch',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/batch': typeof BatchRoute
-  '/jobs': typeof JobsRoute
-  '/settings': typeof SettingsRoute
-  '/single': typeof SingleRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/app/batch': typeof AppBatchRoute
+  '/app/jobs': typeof AppJobsRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/single': typeof AppSingleRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/batch': typeof BatchRoute
-  '/jobs': typeof JobsRoute
-  '/settings': typeof SettingsRoute
-  '/single': typeof SingleRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/app/batch': typeof AppBatchRoute
+  '/app/jobs': typeof AppJobsRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/single': typeof AppSingleRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/batch': typeof BatchRoute
-  '/jobs': typeof JobsRoute
-  '/settings': typeof SettingsRoute
-  '/single': typeof SingleRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/app/batch': typeof AppBatchRoute
+  '/app/jobs': typeof AppJobsRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/single': typeof AppSingleRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/batch' | '/jobs' | '/settings' | '/single'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/login'
+    | '/reset-password'
+    | '/app/batch'
+    | '/app/jobs'
+    | '/app/settings'
+    | '/app/single'
+    | '/auth/callback'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/batch' | '/jobs' | '/settings' | '/single'
-  id: '__root__' | '/' | '/batch' | '/jobs' | '/settings' | '/single'
+  to:
+    | '/'
+    | '/login'
+    | '/reset-password'
+    | '/app/batch'
+    | '/app/jobs'
+    | '/app/settings'
+    | '/app/single'
+    | '/auth/callback'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/login'
+    | '/reset-password'
+    | '/app/batch'
+    | '/app/jobs'
+    | '/app/settings'
+    | '/app/single'
+    | '/auth/callback'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  BatchRoute: typeof BatchRoute
-  JobsRoute: typeof JobsRoute
-  SettingsRoute: typeof SettingsRoute
-  SingleRoute: typeof SingleRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/single': {
-      id: '/single'
-      path: '/single'
-      fullPath: '/single'
-      preLoaderRoute: typeof SingleRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/jobs': {
-      id: '/jobs'
-      path: '/jobs'
-      fullPath: '/jobs'
-      preLoaderRoute: typeof JobsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/batch': {
-      id: '/batch'
-      path: '/batch'
-      fullPath: '/batch'
-      preLoaderRoute: typeof BatchRouteImport
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -116,25 +183,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/single': {
+      id: '/app/single'
+      path: '/single'
+      fullPath: '/app/single'
+      preLoaderRoute: typeof AppSingleRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/jobs': {
+      id: '/app/jobs'
+      path: '/jobs'
+      fullPath: '/app/jobs'
+      preLoaderRoute: typeof AppJobsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/batch': {
+      id: '/app/batch'
+      path: '/batch'
+      fullPath: '/app/batch'
+      preLoaderRoute: typeof AppBatchRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppBatchRoute: typeof AppBatchRoute
+  AppJobsRoute: typeof AppJobsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppSingleRoute: typeof AppSingleRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppBatchRoute: AppBatchRoute,
+  AppJobsRoute: AppJobsRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppSingleRoute: AppSingleRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  BatchRoute: BatchRoute,
-  JobsRoute: JobsRoute,
-  SettingsRoute: SettingsRoute,
-  SingleRoute: SingleRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

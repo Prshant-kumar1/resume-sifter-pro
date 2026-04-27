@@ -7,7 +7,7 @@ import { api, type JobDescription, type ScreeningResult } from "@/lib/api";
 import { useAppStore, useLocalStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/single")({
+export const Route = createFileRoute("/app/single")({
   head: () => ({
     meta: [
       { title: "Single Screening — ResumeSift" },
