@@ -1,12 +1,13 @@
-import { createRootRoute, HeadContent, Scripts, Link } from "@tanstack/react-router";
-import { AppLayout } from "@/components/AppLayout";
+import { createRootRoute, HeadContent, Scripts, Link, Outlet } from "@tanstack/react-router";
+import { ThemeProvider, NO_FLASH_THEME_SCRIPT } from "@/lib/theme";
+import { AuthProvider } from "@/lib/auth";
 
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
+    <div className="bg-aurora flex min-h-screen items-center justify-center px-4">
+      <div className="glass-strong max-w-md rounded-2xl px-8 py-10 text-center">
         <h1 className="text-7xl font-bold text-gradient-teal">404</h1>
         <h2 className="mt-4 text-xl font-semibold">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -17,7 +18,7 @@ function NotFoundComponent() {
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
           >
-            Go to Dashboard
+            Back to home
           </Link>
         </div>
       </div>
@@ -45,21 +46,15 @@ export const Route = createRootRoute({
       { name: "twitter:card", content: "summary" },
     ],
     links: [
-      {
-        rel: "preconnect",
-        href: "https://fonts.googleapis.com",
-      },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous",
-      },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
       },
       { rel: "stylesheet", href: appCss },
     ],
+    scripts: [{ children: NO_FLASH_THEME_SCRIPT }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -68,7 +63,7 @@ export const Route = createRootRoute({
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
@@ -81,5 +76,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <AppLayout />;
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    </ThemeProvider>
+  );
 }

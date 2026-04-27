@@ -9,123 +9,143 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SingleRouteImport } from './routes/single'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as JobsRouteImport } from './routes/jobs'
-import { Route as BatchRouteImport } from './routes/batch'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppSingleRouteImport } from './routes/app.single'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppJobsRouteImport } from './routes/app.jobs'
+import { Route as AppBatchRouteImport } from './routes/app.batch'
 
-const SingleRoute = SingleRouteImport.update({
-  id: '/single',
-  path: '/single',
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const AppSingleRoute = AppSingleRouteImport.update({
+  id: '/app/single',
+  path: '/app/single',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JobsRoute = JobsRouteImport.update({
-  id: '/jobs',
-  path: '/jobs',
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/app/settings',
+  path: '/app/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BatchRoute = BatchRouteImport.update({
-  id: '/batch',
-  path: '/batch',
+const AppJobsRoute = AppJobsRouteImport.update({
+  id: '/app/jobs',
+  path: '/app/jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppBatchRoute = AppBatchRouteImport.update({
+  id: '/app/batch',
+  path: '/app/batch',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/batch': typeof BatchRoute
-  '/jobs': typeof JobsRoute
-  '/settings': typeof SettingsRoute
-  '/single': typeof SingleRoute
+  '/app/batch': typeof AppBatchRoute
+  '/app/jobs': typeof AppJobsRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/single': typeof AppSingleRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/batch': typeof BatchRoute
-  '/jobs': typeof JobsRoute
-  '/settings': typeof SettingsRoute
-  '/single': typeof SingleRoute
+  '/app/batch': typeof AppBatchRoute
+  '/app/jobs': typeof AppJobsRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/single': typeof AppSingleRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/batch': typeof BatchRoute
-  '/jobs': typeof JobsRoute
-  '/settings': typeof SettingsRoute
-  '/single': typeof SingleRoute
+  '/app/batch': typeof AppBatchRoute
+  '/app/jobs': typeof AppJobsRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/single': typeof AppSingleRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/batch' | '/jobs' | '/settings' | '/single'
+  fullPaths:
+    | '/app/batch'
+    | '/app/jobs'
+    | '/app/settings'
+    | '/app/single'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/batch' | '/jobs' | '/settings' | '/single'
-  id: '__root__' | '/' | '/batch' | '/jobs' | '/settings' | '/single'
+  to: '/app/batch' | '/app/jobs' | '/app/settings' | '/app/single' | '/app'
+  id:
+    | '__root__'
+    | '/app/batch'
+    | '/app/jobs'
+    | '/app/settings'
+    | '/app/single'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  BatchRoute: typeof BatchRoute
-  JobsRoute: typeof JobsRoute
-  SettingsRoute: typeof SettingsRoute
-  SingleRoute: typeof SingleRoute
+  AppBatchRoute: typeof AppBatchRoute
+  AppJobsRoute: typeof AppJobsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppSingleRoute: typeof AppSingleRoute
+  AppIndexRoute: typeof AppIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/single': {
-      id: '/single'
-      path: '/single'
-      fullPath: '/single'
-      preLoaderRoute: typeof SingleRouteImport
+    '/app/': {
+      id: '/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+    '/app/single': {
+      id: '/app/single'
+      path: '/app/single'
+      fullPath: '/app/single'
+      preLoaderRoute: typeof AppSingleRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/jobs': {
-      id: '/jobs'
-      path: '/jobs'
-      fullPath: '/jobs'
-      preLoaderRoute: typeof JobsRouteImport
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/app/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/batch': {
-      id: '/batch'
-      path: '/batch'
-      fullPath: '/batch'
-      preLoaderRoute: typeof BatchRouteImport
+    '/app/jobs': {
+      id: '/app/jobs'
+      path: '/app/jobs'
+      fullPath: '/app/jobs'
+      preLoaderRoute: typeof AppJobsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/app/batch': {
+      id: '/app/batch'
+      path: '/app/batch'
+      fullPath: '/app/batch'
+      preLoaderRoute: typeof AppBatchRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  BatchRoute: BatchRoute,
-  JobsRoute: JobsRoute,
-  SettingsRoute: SettingsRoute,
-  SingleRoute: SingleRoute,
+  AppBatchRoute: AppBatchRoute,
+  AppJobsRoute: AppJobsRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppSingleRoute: AppSingleRoute,
+  AppIndexRoute: AppIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
