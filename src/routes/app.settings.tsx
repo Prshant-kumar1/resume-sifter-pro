@@ -4,7 +4,7 @@ import { CheckCircle2, XCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { useAppStore, useLocalStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/app/settings")({
   head: () => ({
     meta: [
       { title: "Settings — ResumeSift" },

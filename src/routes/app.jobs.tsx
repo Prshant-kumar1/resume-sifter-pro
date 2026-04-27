@@ -5,7 +5,7 @@ import { api, type JobDescription } from "@/lib/api";
 import { useLocalStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/jobs")({
+export const Route = createFileRoute("/app/jobs")({
   head: () => ({
     meta: [
       { title: "Job Repository — ResumeSift" },
@@ -240,7 +240,7 @@ function JobsPage() {
               <div className="mt-4 flex items-center gap-2">
                 <button
                   onClick={() =>
-                    navigate({ to: "/single", search: { job: String(j.id) } as never })
+                    navigate({ to: "/app/single", search: { job: String(j.id) } as never })
                   }
                   className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/25"
                 >

@@ -33,7 +33,7 @@ import { useAppStore, useLocalStore } from "@/lib/store";
 import { api, type ScreeningResult } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/app/")({
   head: () => ({
     meta: [
       { title: "Dashboard — ResumeSift" },
@@ -438,7 +438,7 @@ function DashboardPage() {
               Get started by screening your first resume.
             </p>
             <Link
-              to="/single"
+              to="/app/single"
               className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
             >
               Screen your first resume <ArrowRight className="h-4 w-4" />
