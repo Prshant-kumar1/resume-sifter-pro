@@ -5,8 +5,6 @@ import {
   Target,
   TrendingUp,
   Calendar,
-  Briefcase,
-  Clock,
   Eye,
   EyeOff,
   Download,
