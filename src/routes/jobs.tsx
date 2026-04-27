@@ -105,9 +105,11 @@ function JobsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs text-muted-foreground">{allJobs.length} job descriptions</p>
+          <p className="text-xs text-muted-foreground">
+            {filteredJobs.length} of {allJobs.length} job descriptions
+          </p>
         </div>
         <button
           onClick={openCreate}
@@ -116,6 +118,53 @@ function JobsPage() {
           <Plus className="h-4 w-4" /> Add New Job
         </button>
       </div>
+
+      {allJobs.length > 0 && (
+        <div className="surface flex flex-col gap-2 rounded-xl border border-border/60 p-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by title, department, or keyword in description…"
+              className="surface-elev w-full rounded-lg border border-border py-2 pl-9 pr-9 text-sm focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
+                aria-label="Clear search"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+          <select
+            value={departmentFilter}
+            onChange={(e) => setDepartmentFilter(e.target.value)}
+            className="surface-elev rounded-lg border border-border px-3 py-2 text-sm focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-52"
+          >
+            <option value="all">All departments</option>
+            {departments.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+          {(query || departmentFilter !== "all") && (
+            <button
+              onClick={() => {
+                setQuery("");
+                setDepartmentFilter("all");
+              }}
+              className="rounded-lg border border-border bg-surface-elevated px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      )}
 
       {allJobs.length === 0 ? (
         <div className="surface flex flex-col items-center justify-center rounded-xl border border-dashed border-border px-5 py-20 text-center">
