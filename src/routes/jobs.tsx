@@ -182,9 +182,28 @@ function JobsPage() {
             <Plus className="h-4 w-4" /> Add a job
           </button>
         </div>
+      ) : filteredJobs.length === 0 ? (
+        <div className="surface flex flex-col items-center justify-center rounded-xl border border-dashed border-border px-5 py-16 text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
+            <Search className="h-6 w-6" />
+          </div>
+          <h3 className="text-base font-semibold">No jobs match your filters</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Try a different keyword or clear the filters.
+          </p>
+          <button
+            onClick={() => {
+              setQuery("");
+              setDepartmentFilter("all");
+            }}
+            className="mt-5 rounded-lg border border-border bg-surface-elevated px-4 py-2 text-sm font-medium hover:bg-surface"
+          >
+            Clear filters
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {allJobs.map((j) => (
+          {filteredJobs.map((j) => (
             <div
               key={j.id}
               className="surface group flex flex-col rounded-xl border border-border/60 p-5 transition hover:border-primary/30"
