@@ -144,13 +144,6 @@ function DashboardPage() {
       return !isNaN(dt.getTime()) && dt.toDateString() === today;
     }).length;
 
-    const roleCount = new Map<string, number>();
-    data.forEach((d) => {
-      const r = d.job_role ?? d.job_title ?? "—";
-      roleCount.set(r, (roleCount.get(r) ?? 0) + 1);
-    });
-    const topRole = Array.from(roleCount.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
-
     return [
       {
         label: "Total Screened",
@@ -175,13 +168,6 @@ function DashboardPage() {
         value: String(screenedToday),
         icon: Calendar,
         trend: { dir: "up", pct: "18%", vs: "vs yesterday" },
-      },
-      { label: "Top Matched Role", value: topRole, icon: Briefcase },
-      {
-        label: "Avg Time to Screen",
-        value: "2.4s",
-        icon: Clock,
-        trend: { dir: "down", pct: "8%", vs: "faster" },
       },
     ];
   }, [data]);
