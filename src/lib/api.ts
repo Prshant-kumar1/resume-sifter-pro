@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
+import { useAppStore } from "@/lib/store";
 
-export const API_BASE_URL = "https://resumesift-backend.onrender.com/api/v1";
+export const DEFAULT_API_BASE_URL = "https://resumesift-backend.onrender.com/api/v1";
 
 type FetchOptions = RequestInit & {
   params?: Record<string, string | number | boolean | undefined>;
@@ -8,7 +9,8 @@ type FetchOptions = RequestInit & {
 
 async function request<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const { params, headers, ...rest } = options;
-  let url = `${API_BASE_URL}${path}`;
+  const apiBaseUrl = useAppStore.getState().apiBaseUrl || DEFAULT_API_BASE_URL;
+  let url = `${apiBaseUrl}${path}`;
   if (params) {
     const qs = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => {
