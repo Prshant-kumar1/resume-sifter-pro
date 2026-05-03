@@ -63,8 +63,8 @@ function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      // Already signed in — bounce to app (target is validated above)
-      window.location.href = targetAfterAuth;
+      // Already signed in — navigate to app (target is validated above)
+      navigate({ to: targetAfterAuth as "/app" });
     }
   }, [user, loading, targetAfterAuth]);
 
