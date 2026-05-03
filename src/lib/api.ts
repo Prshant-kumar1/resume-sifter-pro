@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export const API_BASE_URL = "https://resumesift-backend.onrender.com/api/v1";
 
 type FetchOptions = RequestInit & {
@@ -15,17 +17,33 @@ async function request<T>(path: string, options: FetchOptions = {}): Promise<T> 
     const s = qs.toString();
     if (s) url += `?${s}`;
   }
+
+  // Attach Supabase JWT to every request so the backend can verify the caller
+  const authHeaders: Record<string, string> = {};
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (token) authHeaders.Authorization = `Bearer ${token}`;
+  } catch {
+    // No session available — request proceeds unauthenticated
+  }
+
   const res = await fetch(url, {
     ...rest,
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      ...authHeaders,
       ...headers,
     },
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`API ${res.status}: ${text || res.statusText}`);
+    // Log raw details for developers; throw a generic message for UI consumption
+    if (typeof console !== "undefined") {
+      console.error(`API ${res.status} ${path}:`, text || res.statusText);
+    }
+    throw new Error(`Request failed (${res.status})`);
   }
   // Some endpoints might return empty
   const ct = res.headers.get("content-type") || "";
