@@ -63,8 +63,9 @@ function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      // Already signed in — navigate to app (target is validated above)
-      navigate({ to: targetAfterAuth as "/app" });
+      // Already signed in — replace instead of push so the login page is not
+      // left in the browser history stack (pressing Back would skip it).
+      navigate({ to: targetAfterAuth as "/app", replace: true });
     }
   }, [user, loading, targetAfterAuth]);
 
@@ -98,7 +99,7 @@ function LoginPage() {
           setServerError(error);
           return;
         }
-        navigate({ to: targetAfterAuth as "/app" });
+        navigate({ to: targetAfterAuth as "/app", replace: true });
       } else {
         const { error, needsConfirmation } = await signUpWithPassword(email, password, fullName);
         if (error) {
@@ -109,7 +110,7 @@ function LoginPage() {
           setInfo("Check your inbox to confirm your email, then log in.");
           setMode("login");
         } else {
-          navigate({ to: "/app" });
+          navigate({ to: "/app", replace: true });
         }
       }
     } finally {
