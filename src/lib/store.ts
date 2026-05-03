@@ -19,7 +19,7 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       threshold: 50,
       privacyMode: false,
-      apiBaseUrl: "https://web-production-ac9a1.up.railway.app/api/v1",
+      apiBaseUrl: "https://resumesift-backend.onrender.com/api/v1",
       displayName: "Recruiter",
       email: "recruiter@resumesift.io",
       role: "Hiring Manager",

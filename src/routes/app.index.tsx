@@ -147,25 +147,21 @@ function DashboardPage() {
         label: "Total Screened",
         value: String(total || 0),
         icon: Users,
-        trend: { dir: "up", pct: "12%", vs: "vs last week" },
       },
       {
         label: "Match Rate",
         value: `${matchRate}%`,
         icon: Target,
-        trend: { dir: "up", pct: "4%", vs: "vs last week" },
       },
       {
         label: "Avg Confidence",
         value: `${avgConf}%`,
         icon: TrendingUp,
-        trend: { dir: "up", pct: "2%", vs: "vs last week" },
       },
       {
         label: "Screened Today",
         value: String(screenedToday),
         icon: Calendar,
-        trend: { dir: "up", pct: "18%", vs: "vs yesterday" },
       },
     ];
   }, [data]);
@@ -178,10 +174,7 @@ function DashboardPage() {
       const key = d.toISOString().slice(0, 10);
       days.push({
         date: d.toLocaleDateString([], { month: "short", day: "numeric" }),
-        count:
-          data.filter((x) => (x.date ?? x.created_at ?? "").slice(0, 10) === key).length ||
-          // demo seed when no data
-          (data.length === 0 ? Math.floor(Math.random() * 12 + 2) : 0),
+        count: data.filter((x) => (x.date ?? x.created_at ?? "").slice(0, 10) === key).length,
       });
     }
     return days;
@@ -194,10 +187,7 @@ function DashboardPage() {
         { name: "Match", value: matches, color: "var(--color-success)" },
         { name: "No Match", value: noMatches, color: "var(--color-destructive)" },
       ]
-    : [
-        { name: "Match", value: 62, color: "var(--color-success)" },
-        { name: "No Match", value: 38, color: "var(--color-destructive)" },
-      ];
+    : [];
 
   // Pagination
   const PAGE_SIZE = 5;

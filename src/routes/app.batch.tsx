@@ -131,24 +131,8 @@ function BatchPage() {
       setResults(ranked);
       setProgress(100);
     } catch (e) {
-      // Simulated fallback
-      const fake: BatchRow[] = csvRows.map((r, i) => {
-        const score = Math.round(Math.random() * 100);
-        return {
-          candidate_name: r.candidate_name ?? r.name ?? `Candidate ${i + 1}`,
-          probability: score,
-          score,
-          result: score >= threshold ? "Match" : "No Match",
-          matched_skills: ["React", "TS", "Node"].slice(0, 1 + Math.floor(Math.random() * 3)),
-        };
-      });
-      const ranked = fake
-        .sort((a, b) => Number(b.score) - Number(a.score))
-        .map((r, i) => ({ ...r, rank: i + 1 }));
-      setResults(ranked);
-      setProgress(100);
       console.error("Batch screening API error:", e);
-      setError("Live API unreachable — showing a simulated batch. Please try again later.");
+      setError("The screening API is currently unreachable. Please check the backend URL in Settings and try again.");
     } finally {
       setLoading(false);
     }

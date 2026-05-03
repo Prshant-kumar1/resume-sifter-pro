@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, XCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, Loader2, RotateCcw } from "lucide-react";
 import { useAppStore, useLocalStore } from "@/lib/store";
+import { DEFAULT_API_BASE_URL } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/settings")({
@@ -70,6 +71,12 @@ function SettingsPage() {
           >
             {testStatus === "loading" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             Test Connection
+          </button>
+          <button
+            onClick={() => { setApiBaseUrl(DEFAULT_API_BASE_URL); setTestStatus("idle"); setTestMsg(""); }}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-elevated px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            <RotateCcw className="h-3 w-3" /> Reset to default
           </button>
           {testStatus === "ok" && (
             <span className="inline-flex items-center gap-1 text-xs text-success">

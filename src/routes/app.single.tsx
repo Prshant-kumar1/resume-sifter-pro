@@ -63,6 +63,7 @@ function ScoreGauge({ score }: { score: number }) {
 function SinglePage() {
   const [resumeText, setResumeText] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
+  const [isPdf, setIsPdf] = useState(false);
   const [jobs, setJobs] = useState<JobDescription[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<string>("");
   const [customJD, setCustomJD] = useState("");
@@ -100,9 +101,12 @@ function SinglePage() {
   const handleFile = async (file: File) => {
     setFileName(file.name);
     if (file.type === "application/pdf") {
-      // Without a PDF parser server-side, just attach a note
-      setResumeText(`[PDF: ${file.name}] — paste text below or rely on backend parsing.`);
+      // PDF binary cannot be extracted without a parser library.
+      // Clear any previous text and prompt the user to paste it manually.
+      setIsPdf(true);
+      setResumeText("");
     } else {
+      setIsPdf(false);
       const text = await file.text();
       setResumeText(text);
     }
@@ -135,22 +139,8 @@ function SinglePage() {
         job_role: selectedJob?.title ?? "Custom JD",
       });
     } catch (e) {
-      // Demo fallback so UI is testable without a live backend
-      const demo: ScreeningResult = {
-        result: Math.random() > 0.4 ? "Match" : "No Match",
-        probability: Math.round(Math.random() * 100),
-        confidence: Math.round(60 + Math.random() * 40),
-        matched_skills: ["TypeScript", "React", "Node.js", "REST APIs"].slice(
-          0,
-          2 + Math.floor(Math.random() * 3),
-        ),
-        missing_skills: ["GraphQL", "AWS", "Docker"].slice(0, 1 + Math.floor(Math.random() * 2)),
-        recommendation:
-          "Strong front-end fundamentals with relevant framework experience. Consider deeper assessment on cloud infrastructure during interview.",
-      };
-      setResult(demo);
       console.error("Screening API error:", e);
-      setError("Live API unreachable — showing a simulated result. Please try again later.");
+      setError("The screening API is currently unreachable. Please check the backend URL in Settings and try again.");
     } finally {
       setLoading(false);
     }
@@ -191,9 +181,19 @@ function SinglePage() {
           )}
         </div>
 
+        {isPdf && (
+          <div className="flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs text-primary">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>
+              PDF text extraction is not supported in the browser. Please paste the resume text
+              manually in the box below.
+            </span>
+          </div>
+        )}
+
         <textarea
           value={resumeText}
-          onChange={(e) => setResumeText(e.target.value)}
+          onChange={(e) => { setResumeText(e.target.value); if (isPdf && e.target.value) setIsPdf(false); }}
           placeholder="Or paste the resume text here…"
           className="surface-elev min-h-40 w-full rounded-lg border border-border px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
