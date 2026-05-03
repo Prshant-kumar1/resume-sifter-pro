@@ -1,4 +1,4 @@
-export const API_BASE_URL = "https://web-production-ac9a1.up.railway.app/api/v1";
+export const API_BASE_URL = "https://resumesift-backend.onrender.com/api/v1";
 
 type FetchOptions = RequestInit & {
   params?: Record<string, string | number | boolean | undefined>;
