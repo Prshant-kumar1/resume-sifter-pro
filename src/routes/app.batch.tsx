@@ -132,7 +132,9 @@ function BatchPage() {
       setProgress(100);
     } catch (e) {
       console.error("Batch screening API error:", e);
-      setError("The screening API is currently unreachable. Please check the backend URL in Settings and try again.");
+      setError(
+        "The screening API is currently unreachable. Please check the backend URL in Settings and try again.",
+      );
     } finally {
       setLoading(false);
     }

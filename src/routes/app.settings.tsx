@@ -73,7 +73,11 @@ function SettingsPage() {
             Test Connection
           </button>
           <button
-            onClick={() => { setApiBaseUrl(DEFAULT_API_BASE_URL); setTestStatus("idle"); setTestMsg(""); }}
+            onClick={() => {
+              setApiBaseUrl(DEFAULT_API_BASE_URL);
+              setTestStatus("idle");
+              setTestMsg("");
+            }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-elevated px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
             <RotateCcw className="h-3 w-3" /> Reset to default

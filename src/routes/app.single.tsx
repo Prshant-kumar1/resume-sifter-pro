@@ -140,7 +140,9 @@ function SinglePage() {
       });
     } catch (e) {
       console.error("Screening API error:", e);
-      setError("The screening API is currently unreachable. Please check the backend URL in Settings and try again.");
+      setError(
+        "The screening API is currently unreachable. Please check the backend URL in Settings and try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -193,7 +195,10 @@ function SinglePage() {
 
         <textarea
           value={resumeText}
-          onChange={(e) => { setResumeText(e.target.value); if (isPdf && e.target.value) setIsPdf(false); }}
+          onChange={(e) => {
+            setResumeText(e.target.value);
+            if (isPdf && e.target.value) setIsPdf(false);
+          }}
           placeholder="Or paste the resume text here…"
           className="surface-elev min-h-40 w-full rounded-lg border border-border px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
