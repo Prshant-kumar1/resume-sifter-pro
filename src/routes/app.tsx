@@ -1,5 +1,5 @@
-import { createFileRoute, Outlet, redirect, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import {
   LayoutDashboard,
   FileSearch,
@@ -12,25 +12,19 @@ import {
   X,
   RefreshCw,
   LogOut,
+  Loader2,
 } from "lucide-react";
 import { useLocalStore } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
-import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useRouterState, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
+// Auth guard lives in the component rather than in beforeLoad so that it runs
+// on the client where localStorage (and the Supabase session) is available.
+// A beforeLoad guard always ran server-side during SSR where localStorage is
+// absent, making getSession() always return null and causing a 307 loop.
 export const Route = createFileRoute("/app")({
-  beforeLoad: async ({ location }) => {
-    if (!isSupabaseConfigured) return; // allow access in unconfigured demo mode
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
-      throw redirect({
-        to: "/login",
-        search: { redirect: `${location.pathname}${location.search}${location.hash}` },
-      });
-    }
-  },
   component: AppLayoutRoute,
 });
 
@@ -75,9 +69,28 @@ function AppLayoutRoute() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // Full current path (including query-string and hash) used as the redirect
+  // target so the user lands back on the exact URL they were trying to visit.
+  const redirectTarget = useRouterState({
+    select: (s) =>
+      `${s.location.pathname}${s.location.searchStr}${s.location.hash}`,
+  });
   const jobsCount = useLocalStore((s) => s.jobs.length);
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, loading, configured, signOut } = useAuth();
+
+  // Client-side auth guard: wait for AuthProvider to finish resolving the
+  // session before deciding to redirect. This avoids the SSR 307 loop where
+  // beforeLoad always redirected because localStorage is unavailable on the server.
+  useEffect(() => {
+    if (!loading && !user && configured) {
+      navigate({
+        to: "/login",
+        search: { redirect: redirectTarget, mode: "login" },
+        replace: true,
+      });
+    }
+  }, [user, loading, configured, navigate, redirectTarget]);
 
   const title = useMemo(() => PAGE_TITLES[pathname] ?? "ResumeSift", [pathname]);
 
@@ -99,6 +112,21 @@ function AppLayoutRoute() {
     await signOut();
     navigate({ to: "/" });
   };
+
+  // Show a spinner while the session is being restored from localStorage.
+  // This prevents a flash of unauthenticated content on initial load.
+  if (loading && configured) {
+    return (
+      <div className="bg-aurora flex min-h-screen items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Unauthenticated — render nothing while the useEffect redirect fires.
+  if (!loading && !user && configured) {
+    return null;
+  }
 
   const sidebar = (
     <aside
