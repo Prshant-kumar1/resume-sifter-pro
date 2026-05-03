@@ -149,7 +149,8 @@ function SinglePage() {
           "Strong front-end fundamentals with relevant framework experience. Consider deeper assessment on cloud infrastructure during interview.",
       };
       setResult(demo);
-      setError(`Live API unreachable — showing simulated result. (${(e as Error).message})`);
+      console.error("Screening API error:", e);
+      setError("Live API unreachable — showing a simulated result. Please try again later.");
     } finally {
       setLoading(false);
     }

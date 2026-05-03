@@ -51,12 +51,20 @@ function LoginPage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
-  const targetAfterAuth = useMemo(() => search.redirect || "/app", [search.redirect]);
+  // Strict same-origin path check to prevent open-redirect attacks
+  // (e.g. //evil.com or /\evil.com would otherwise pass a startsWith("/") check)
+  const isSafeRedirect = (url: string) =>
+    url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\");
+
+  const targetAfterAuth = useMemo(() => {
+    const r = search.redirect;
+    return r && isSafeRedirect(r) ? r : "/app";
+  }, [search.redirect]);
 
   useEffect(() => {
     if (!loading && user) {
-      // Already signed in — bounce to app
-      window.location.href = targetAfterAuth.startsWith("/") ? targetAfterAuth : "/app";
+      // Already signed in — bounce to app (target is validated above)
+      window.location.href = targetAfterAuth;
     }
   }, [user, loading, targetAfterAuth]);
 
@@ -90,7 +98,7 @@ function LoginPage() {
           setServerError(error);
           return;
         }
-        navigate({ to: targetAfterAuth.startsWith("/") ? (targetAfterAuth as "/app") : "/app" });
+        navigate({ to: targetAfterAuth as "/app" });
       } else {
         const { error, needsConfirmation } = await signUpWithPassword(email, password, fullName);
         if (error) {

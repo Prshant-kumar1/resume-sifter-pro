@@ -147,7 +147,8 @@ function BatchPage() {
         .map((r, i) => ({ ...r, rank: i + 1 }));
       setResults(ranked);
       setProgress(100);
-      setError(`Live API unreachable — showing simulated batch. (${(e as Error).message})`);
+      console.error("Batch screening API error:", e);
+      setError("Live API unreachable — showing a simulated batch. Please try again later.");
     } finally {
       setLoading(false);
     }
