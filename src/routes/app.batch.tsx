@@ -33,6 +33,10 @@ function parseCsv(text: string): { headers: string[]; rows: Record<string, strin
     transformHeader: (h) => h.trim(),
     transform: (v) => v.trim(),
   });
+  const criticalErrors = result.errors.filter((e) => e.type !== "FieldMismatch");
+  if (criticalErrors.length > 0) {
+    throw new Error(criticalErrors[0].message);
+  }
   const headers = result.meta.fields ?? [];
   return { headers, rows: result.data };
 }
@@ -74,7 +78,15 @@ function BatchPage() {
     setFileName(file.name);
     setError(null);
     const text = await file.text();
-    const { headers, rows } = parseCsv(text);
+    let headers: string[];
+    let rows: Record<string, string>[];
+    try {
+      ({ headers, rows } = parseCsv(text));
+    } catch (e) {
+      setError(`Failed to parse CSV: ${e instanceof Error ? e.message : String(e)}`);
+      setCsvRows([]);
+      return;
+    }
     if (!headers.includes("resume_text")) {
       setError("CSV must have a 'resume_text' column.");
       setCsvRows([]);
