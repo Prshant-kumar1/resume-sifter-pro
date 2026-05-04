@@ -33,9 +33,12 @@ function parseCsv(text: string): { headers: string[]; rows: Record<string, strin
     transformHeader: (h) => h.trim(),
     transform: (v) => v.trim(),
   });
+  // FieldMismatch errors (inconsistent column counts) are non-fatal — papaparse still
+  // returns partial data for affected rows, which is acceptable for batch screening.
   const criticalErrors = result.errors.filter((e) => e.type !== "FieldMismatch");
   if (criticalErrors.length > 0) {
-    throw new Error(criticalErrors[0].message);
+    const messages = criticalErrors.map((e) => e.message).join("; ");
+    throw new Error(criticalErrors.length === 1 ? messages : `${messages} (${criticalErrors.length} errors)`);
   }
   const headers = result.meta.fields ?? [];
   return { headers, rows: result.data };
