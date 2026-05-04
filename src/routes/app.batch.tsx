@@ -8,6 +8,7 @@ import {
   AlertCircle,
   ChevronDown,
 } from "lucide-react";
+import Papa from "papaparse";
 import { ResultBadge } from "@/components/ResultBadge";
 import { api, type JobDescription, type ScreeningResult } from "@/lib/api";
 import { useAppStore, useLocalStore } from "@/lib/store";
@@ -26,35 +27,21 @@ export const Route = createFileRoute("/app/batch")({
 type BatchRow = ScreeningResult & { rank?: number };
 
 function parseCsv(text: string): { headers: string[]; rows: Record<string, string>[] } {
-  const lines = text.replace(/\r/g, "").split("\n").filter(Boolean);
-  if (lines.length === 0) return { headers: [], rows: [] };
-  const split = (line: string) => {
-    const out: string[] = [];
-    let cur = "";
-    let inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') {
-        if (inQ && line[i + 1] === '"') {
-          cur += '"';
-          i++;
-        } else inQ = !inQ;
-      } else if (c === "," && !inQ) {
-        out.push(cur);
-        cur = "";
-      } else cur += c;
-    }
-    out.push(cur);
-    return out;
-  };
-  const headers = split(lines[0]).map((h) => h.trim());
-  const rows = lines.slice(1).map((l) => {
-    const cells = split(l);
-    const r: Record<string, string> = {};
-    headers.forEach((h, i) => (r[h] = (cells[i] ?? "").trim()));
-    return r;
+  const result = Papa.parse<Record<string, string>>(text, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: (h) => h.trim(),
+    transform: (v) => v.trim(),
   });
-  return { headers, rows };
+  // FieldMismatch errors (inconsistent column counts) are non-fatal — papaparse still
+  // returns partial data for affected rows, which is acceptable for batch screening.
+  const criticalErrors = result.errors.filter((e) => e.type !== "FieldMismatch");
+  if (criticalErrors.length > 0) {
+    const messages = criticalErrors.map((e) => e.message).join("; ");
+    throw new Error(criticalErrors.length === 1 ? messages : `${messages} (${criticalErrors.length} errors)`);
+  }
+  const headers = result.meta.fields ?? [];
+  return { headers, rows: result.data };
 }
 
 function BatchPage() {
@@ -94,7 +81,15 @@ function BatchPage() {
     setFileName(file.name);
     setError(null);
     const text = await file.text();
-    const { headers, rows } = parseCsv(text);
+    let headers: string[];
+    let rows: Record<string, string>[];
+    try {
+      ({ headers, rows } = parseCsv(text));
+    } catch (e) {
+      setError(`Failed to parse CSV: ${e instanceof Error ? e.message : String(e)}`);
+      setCsvRows([]);
+      return;
+    }
     if (!headers.includes("resume_text")) {
       setError("CSV must have a 'resume_text' column.");
       setCsvRows([]);
